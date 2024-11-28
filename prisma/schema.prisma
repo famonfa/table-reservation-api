@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+
+}
+
+model ManagerRestaurant {
+  managerId    String     
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@id([managerId, restaurantId])
+}
+
+model Restaurant {
+  id           String        @id @default(uuid())
+  name         String
+  address      String
+  managers     ManagerRestaurant[]
+  phone        String?
+  cuisine      String?
+  tables       Table[]
+  description  String?
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  bannerImg    String?
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  phone        String?
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Table {
+  id           String        @id @default(uuid())
+  number       Int
+  capacity     Int
+  restaurantId String
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  reservations Reservation[]
+  availableHours String[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Reservation {
+  id           String     @id @default(uuid())
+  reservationDate DateTime?
+  reservationTime String?
+  partySize    Int
+  status       String     @default("pending")
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  tableId      String
+  table        Table      @relation(fields: [tableId], references: [id])
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
